@@ -1,0 +1,17 @@
+---
+- name: Update APT cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+- name: Install common utilities
+  apt:
+    name:
+      - curl
+      - unzip
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - software-properties-common
+    state: present
+    update_cache: yes
