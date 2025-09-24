@@ -1,7 +1,7 @@
 ---
 - name: Download eksctl
   ansible.builtin.get_url:
-    url: https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz
+    url: https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz
     dest: /tmp/eksctl.tar.gz
     mode: "0644"
 
