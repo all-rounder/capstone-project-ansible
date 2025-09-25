@@ -1,0 +1,52 @@
+---
+- name: Ensure dependencies installed (e.g. curl, tar)
+  ansible.builtin.package:
+    name:
+      - curl
+      - tar
+    state: present
+
+- name: Get desired Helm version (if not overridden)
+  ansible.builtin.set_fact:
+    helm_version: "{{ helm_version | default('v3.19.0') }}"
+
+- name: Derive download URL for Helm archive
+  ansible.builtin.set_fact:
+    helm_filename: "helm-{{ helm_version }}-{{ ansible_system | lower }}-{{ helm_arch | default('amd64') }}.tar.gz"
+    helm_download_url: "https://get.helm.sh/{{ helm_filename }}"
+
+- name: Download Helm archive
+  ansible.builtin.get_url:
+    url: "{{ helm_download_url }}"
+    dest: "/tmp/{{ helm_filename }}"
+    mode: "0644"
+    # you can optionally supply a checksum, e.g. "checksum: sha256:<value>"
+
+- name: Extract Helm binary
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ helm_filename }}"
+    dest: /usr/local/bin/
+    remote_src: yes
+    extra_opts: "--strip-components=1 linux-{{ helm_arch | default('amd64') }}"
+    creates: /usr/local/bin/helm
+
+- name: Ensure Helm binary is executable
+  ansible.builtin.file:
+    path: /usr/local/bin/helm
+    mode: "0755"
+
+- name: Clean up Helm archive file
+  ansible.builtin.file:
+    path: "/tmp/{{ helm_filename }}"
+    state: absent
+
+- name: Verify Helm installation
+  ansible.builtin.command:
+    cmd: helm version --short
+  register: helm_version_check
+  changed_when: false
+  failed_when: helm_version_check.rc != 0
+
+- name: Debug Helm version
+  ansible.builtin.debug:
+    msg: "Installed Helm version: {{ helm_version_check.stdout }}"

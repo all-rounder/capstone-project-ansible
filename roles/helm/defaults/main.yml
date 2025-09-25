@@ -1,0 +1,4 @@
+# roles/helm/defaults/main.yml
+---
+helm_version: v3.19.0
+helm_arch: amd64
